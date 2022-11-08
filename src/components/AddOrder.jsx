@@ -10,8 +10,11 @@ const AddOrder = ({ setOrders }) => {
     const [phoneNumber, setPhoneNumber] = useState('')
     const [order, setOrder] = useState('')
 
+    const [loading, setLoading] = useState(false)
+
     async function handleAdd(e) {
         e.preventDefault()
+        setLoading(true)
         const data = {
             name,
             quantity,
@@ -23,12 +26,12 @@ const AddOrder = ({ setOrders }) => {
 
         const res = await addOrder(data)
         if (res.success) {
-
             setOrders(prevOrders => [...prevOrders, { ...data, paid: 0 }])
             alert('Order Added')
         }
         else
             alert('Could not add order')
+        setLoading(false)
     }
 
     return (
@@ -67,7 +70,9 @@ const AddOrder = ({ setOrders }) => {
                     <input type="text" onChange={(e) => setOrder(e.target.value)} />
                 </div>
             </form>
-            <button onClick={handleAdd} style={{ display: 'flex', padding: '0.5rem 3rem', backgroundColor: '#b6e1ff', border: '1px solid blue', cursor: 'pointer', margin: ' 1rem auto' }}>Submit</button>
+            <button disabled={loading} onClick={handleAdd} style={{ display: 'flex', padding: '0.5rem 3rem', backgroundColor: '#b6e1ff', border: '1px solid blue', cursor: 'pointer', margin: ' 1rem auto' }}>
+                {loading ? 'Please Wait...' : 'Submit'}
+            </button>
         </>
     )
 }
