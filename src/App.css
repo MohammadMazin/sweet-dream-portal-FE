@@ -1,0 +1,13 @@
+.Collapsible{
+    background-color: rgb(0, 58, 175);
+    color:white;
+    padding:1rem 0 0 0;
+    cursor:pointer;
+    margin:1rem 0;
+}
+
+.Collapsible__contentInner{
+    background-color: rgb(212, 244, 255);
+    color:black;
+    padding:0.5rem;
+}

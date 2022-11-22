@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react'
 import AddOrder from '../components/AddOrder'
 import Order from '../components/Order'
 import { getAllOrders } from '../services/orders'
+import toast, { Toaster } from 'react-hot-toast';
+import * as XLSX from 'xlsx';
+import Collapsible from 'react-collapsible';
+
 const Home = () => {
 
     const [orders, setOrders] = useState([])
@@ -20,6 +24,15 @@ const Home = () => {
         }
         fetchData()
     }, [])
+
+    const downloadExcel = (data) => {
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        //let buffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
+        //XLSX.write(workbook, { bookType: "xlsx", type: "binary" });
+        XLSX.writeFile(workbook, "DataSheet.xlsx");
+    };
 
 
 
@@ -48,38 +61,47 @@ const Home = () => {
         setFilteredOrders(prevFilter => orders.map(order => { return order?.paid === 0 && order }))
     }
 
-
-
     return (
-        <div style={{ backgroundColor: '#f4f4f4' }}>
-            <h1>Add Order</h1>
-            <AddOrder setOrders={setOrders} />
-            <hr />
+        <>
+            <div><Toaster /></div>
 
-            <h1>Orders</h1>
-            <div style={{ display: 'flex', gap: '1rem' }}>
-                <button onClick={handleShowAllOrders}>View All Orders</button>
-                <button onClick={handleShowCompletedOrders}>View Completded Orders</button>
-                <button onClick={handleShowIncompleteOrders}>View Incompleted Orders</button>
+
+            <div style={{ backgroundColor: '#f4f4f4' }}>
+                <Collapsible trigger="Click to add order" style={{ backgroundColor: 'red' }}>
+                    <h1>Add Order</h1>
+                    <AddOrder setOrders={setOrders} />
+                    <hr />
+                </Collapsible>
+                <button onClick={() => downloadExcel(orders)}>
+                    Download Orders Details As Excel Spreadsheet
+                </button>
+
+
+                <h1>{orders.length} Orders</h1>
+                {/* <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button onClick={handleShowAllOrders}>View All Orders</button>
+                    <button onClick={handleShowCompletedOrders}>View Completded Orders</button>
+                    <button onClick={handleShowIncompleteOrders}>View Incompleted Orders</button>
+                </div> */}
+                <h4>Total Revenue: {generateTotalRevenue()} PKR</h4>
+                <h4>Unearned Revenue: {generateUnearnedRevenue()} PKR</h4>
+                <h4>Earned Revenue: {generateEarnedRevenue()} PKR</h4>
+                <hr />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3rem' }}>
+                    {/* {filteredOrders.reverse().map((order, index) => { */}
+                    {orders.reverse().map((order, index) => {
+                        if (typeof order !== "object")
+                            return null
+                        return (
+                            <>
+                                <Order index={index + 1} data={order} setOrders={setOrders} />
+                            </>
+                        )
+                    })}
+                </div>
             </div>
-            <h4>Total Revenue: {generateTotalRevenue()} PKR</h4>
-            <h4>Unearned Revenue: {generateUnearnedRevenue()} PKR</h4>
-            <h4>Earned Revenue: {generateEarnedRevenue()} PKR</h4>
-            <hr />
-            <hr />
-            {filteredOrders.reverse().map((order, index) => {
-                const { name, quantity, location, amount, paid } = order
-                if (typeof order !== "object")
-                    return null
-                return (
-                    <>
-                        <h5>Order {index + 1}</h5>
-                        <Order data={order} setOrders={setOrders} />
-                        <hr />
-                    </>
-                )
-            })}
-        </div>
+        </>
+
     )
 }
 
